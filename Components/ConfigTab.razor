@@ -1,0 +1,78 @@
+﻿@using Bitathon.Models
+@inject ISnackbar SnackBar
+@inject ConfigService AppService
+
+<MudContainer Class="mt-16" MaxWidth="MaxWidth.Large">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="12" sm="12" md="12" lg="12">
+            
+            <MudCard Elevation="25" Class="rounded-lg pt-0 pb-0 mb-4">
+                <MudCardHeader Class="pb-0">
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6" Align="Align.Left">
+                            Twitch API Credentials
+                        </MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudLink Href="https://dev.twitch.tv/console/apps" Target="_blank">
+                            <MudIconButton Icon="@Icons.Material.Filled.Launch"/>
+                        </MudLink>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent Class="pt-0">
+                    <MudTextField T="string" @bind-Value="@AppConfigDto!.ClientId"
+                                  HelperText="Client ID" InputType="InputType.Password" Margin="Margin.Dense"/>
+                    <MudTextField T="string" @bind-Value="@AppConfigDto!.ClientSecret"
+                                  HelperText="Client Secret" InputType="InputType.Password" Margin="Margin.Dense"/>
+                </MudCardContent>
+            </MudCard>
+
+            <MudCard Elevation="25" Class="rounded-lg pt-0 pb-0 mb-4">
+                <MudCardHeader Class="pb-0">
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6" Align="Align.Left">
+                            Bitathon Values
+                        </MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Class="pt-0">
+                    <MudTextField T="TimeSpan" @bind-Value="@AppConfigDto!.InitialStreamCountDown"
+                                  HelperText="Initial Stream Countdown" Margin="Margin.Dense"/>
+                    <MudTextField T="int" @bind-Value="@AppConfigDto!.SecondsPer100Bits"
+                                  HelperText="Seconds per 100 Bits" Margin="Margin.Dense"/>
+                    <MudTextField T="int" @bind-Value="@AppConfigDto!.SecondsPerTier1Sub"
+                                  HelperText="Seconds per Tier 1 Sub" Margin="Margin.Dense"/>
+                    <MudTextField T="int" @bind-Value="@AppConfigDto!.SecondsPerTier2Sub"
+                                  HelperText="Seconds per Tier 2 Sub" Margin="Margin.Dense"/>
+                    <MudTextField T="int" @bind-Value="@AppConfigDto!.SecondsPerTier3Sub"
+                                  HelperText="Seconds per Tier 3 Sub" Margin="Margin.Dense"/>
+                </MudCardContent>
+            </MudCard>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="SaveAppConfig">Save</MudButton>
+            
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code
+{
+    private AppConfig? AppConfigDto { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        AppConfigDto = AppService.GetApplicationConfigDto();
+    }
+
+    private void SaveAppConfig()
+    {
+        SnackBar.Clear();
+        SnackBar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        SnackBar.Configuration.PreventDuplicates = true;
+        SnackBar.Configuration.VisibleStateDuration = 1000;
+        SnackBar.Configuration.SnackbarVariant = Variant.Filled;
+        SnackBar.Add("Config saved successfully!", Severity.Success);
+        AppService.SaveApplicationConfig();
+    }
+}

@@ -6,11 +6,18 @@
         <Nullable>enable</Nullable>
         <UseWindowsForms>true</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
+        <ApplicationIcon>bit.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="6.0.300-rc.3.5667" />
       <PackageReference Include="MudBlazor" Version="6.0.10" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="bit.ico">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

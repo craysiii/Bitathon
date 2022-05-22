@@ -7,8 +7,28 @@
 <PageTitle>Bitathon</PageTitle>
 
 <MudLayout>
-    <MudTabs Elevation="4" Rounded="false" Color="Color.Primary" Centered="true">
-        <MudTabPanel Text="Bitathon"></MudTabPanel>
-        <MudTabPanel Text="Settings"></MudTabPanel>
-    </MudTabs>
+    <MudAppBar Color="Color.Primary" Fixed="true">
+        <MudSpacer/>
+        <MudButton OnClick='() => SetCurrentTab("BitathonTab")' Color="Color.Primary" Variant="Variant.Filled" DisableElevation="true">Bitathon</MudButton>
+        <MudButton OnClick='() => SetCurrentTab("ConfigTab")' Color="Color.Primary" Variant="Variant.Filled" DisableElevation="true">Config</MudButton>
+        <MudSpacer/>
+    </MudAppBar>
+    
+    <DynamicComponent Type="CurrentNavigationState" />
 </MudLayout>
+
+@code
+{
+    private Type CurrentNavigationState { get; set; } = NavigationStates["ConfigTab"];
+    
+    private static readonly Dictionary<string, Type> NavigationStates = new()
+    {
+        {"BitathonTab", typeof(BitathonTab)},
+        {"ConfigTab", typeof(ConfigTab)}
+    };
+
+    private void SetCurrentTab(string tabName)
+    {
+        CurrentNavigationState = NavigationStates[tabName];
+    }
+}

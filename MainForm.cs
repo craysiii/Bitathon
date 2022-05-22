@@ -1,3 +1,4 @@
+using Bitathon.Services;
 using Microsoft.AspNetCore.Components.WebView.WindowsForms;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
@@ -13,15 +14,13 @@ public partial class MainForm : Form
         // Register services
         var services = new ServiceCollection();
         services.AddWindowsFormsBlazorWebView();
-#if DEBUG
-        services.AddBlazorWebViewDeveloperTools();
-#endif
         services.AddMudServices();
-        
+        services.AddMudBlazorSnackbar();
+        services.AddSingleton<ConfigService>();
+
         // Configure BlazorWebView
         blazorWebView.HostPage = "wwwroot\\index.html";
         blazorWebView.Services = services.BuildServiceProvider();
-
         blazorWebView.RootComponents.Add<App>("#app");
     }
 }

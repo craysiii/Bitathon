@@ -37,7 +37,7 @@ partial class MainForm
         this.blazorWebView.Dock = System.Windows.Forms.DockStyle.Fill;
         this.blazorWebView.Location = new System.Drawing.Point(0, 0);
         this.blazorWebView.Name = "blazorWebView";
-        this.blazorWebView.Size = new System.Drawing.Size(800, 450);
+        this.blazorWebView.Size = new System.Drawing.Size(500, 810);
         this.blazorWebView.TabIndex = 0;
         this.blazorWebView.Text = "Bitathon";
         // 
@@ -45,8 +45,9 @@ partial class MainForm
         // 
         this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(500, 800);
+        this.ClientSize = new System.Drawing.Size(500, 810);
         this.Controls.Add(this.blazorWebView);
+        this.Icon = new Icon("bit.ico");
         this.Name = "MainForm";
         this.Text = "Bitathon";
         this.ResumeLayout(false);
