@@ -1,5 +1,122 @@
-﻿
+﻿@inject BitathonService BitathonService
+@inject IDialogService Dialog
+@inject LoggingService Logger
+
+<MudContainer Class="mt-16" MaxWidth="MaxWidth.Large">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="12" sm="12" md="12" lg="12">
+
+            <MudCard Elevation="25" Class="rounded-lg pt-0 pb-0 mb-4">
+                <MudCardHeader Class="pb-0">
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6" Align="Align.Left">
+                            Current Bitathon
+                        </MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.Start" OnClick="StartBitathon" Disabled="IsBitathonRunning"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.Pause" OnClick="PauseBitathon" Disabled="!IsBitathonRunning"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.Clear" OnClick="ResetBitathon"/>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent Class="pt-0">
+                    <MudText Typo="Typo.h1" Align="Align.Center">
+                        @TimeLeft
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+            
+            <MudCard Elevation="25" Class="rounded-lg pt-0 pb-0 mb-4">
+                <MudCardHeader Class="pb-0">
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6" Align="Align.Left">
+                            Add / Remove Time
+                        </MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Class="pt-0 d-flex">
+                    <MudTextField T="int" Margin="Margin.Dense" Class="d-inline" @bind-Value="TimeToAdd"/>
+                    <MudSelect Margin="Margin.Dense" @bind-Value="UnitOfTime">
+                        <MudSelectItem Value="1" >Seconds</MudSelectItem>
+                        <MudSelectItem Value="60">Minutes</MudSelectItem>
+                        <MudSelectItem Value="3600">Hours</MudSelectItem>
+                    </MudSelect>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="AddTimeToBitathon" />
+                </MudCardContent>
+            </MudCard>
+            
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
 
 @code {
-    
+    private TimeSpan TimeLeft { get; set; }
+    private bool IsBitathonRunning { get; set; }
+    private int TimeToAdd { get; set; }
+    private int UnitOfTime { get; set; } = 1;
+    private PeriodicTimer PeriodicTimer { get; } = new (TimeSpan.FromMilliseconds(250));
+    private CancellationToken TimerCancellationToken { get; } = new ();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        IsBitathonRunning = BitathonService.Bitathon!.IsRunning;
+        await StartGuiUpdate();
+    }
+
+    private async Task StartGuiUpdate()
+    {
+        while (await PeriodicTimer.WaitForNextTickAsync(TimerCancellationToken)
+               && !TimerCancellationToken.IsCancellationRequested)
+        {
+            UpdateTimer();
+        }
+    }
+
+    private void UpdateTimer()
+    {
+        InvokeAsync(() =>
+        {
+            TimeLeft = BitathonService.Bitathon!.TimeLeft;
+            IsBitathonRunning = BitathonService.Bitathon.IsRunning;
+            StateHasChanged();
+        });
+    }
+
+    private void StartBitathon()
+    {
+        Logger.Log("Bitathon started");
+        BitathonService.StartBitathon();
+    }
+
+    private void PauseBitathon()
+    {
+        Logger.Log("Bitathon paused");
+        BitathonService.StopBitathon();
+    }
+
+    private async Task ResetBitathon()
+    {
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = false,
+            DisableBackdropClick = true
+        };
+
+        var cancelDialog =  Dialog.Show<ResetDialog>("Reset Bitathon?", options);
+        var dialogResult = await cancelDialog.Result;
+        if (!dialogResult.Cancelled)
+        {
+            BitathonService.ResetBitathon();
+            Logger.Log("Bitathon reset");
+        }
+    }
+
+    private void AddTimeToBitathon()
+    {
+        var totalTimeToAdd = TimeToAdd * UnitOfTime;
+        BitathonService.ModifyTimeLeft(totalTimeToAdd);
+        Logger.Log($"Manually added {totalTimeToAdd} seconds");
+    }
 }

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Bitathon Authentication</title>
+    </head>
+    <body>
+        You can close this window now.
+        <script>
+            const Http = new XMLHttpRequest();
+            const Url = 'http://localhost:3690/?';
+            let fragment = location.hash.substring(1);
+            Http.open("GET", Url + fragment);
+            Http.send();
+        </script>
+    </body>
+</html>

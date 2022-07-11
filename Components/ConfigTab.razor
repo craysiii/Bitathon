@@ -1,6 +1,8 @@
-﻿@using Bitathon.Models
-@inject ISnackbar SnackBar
+﻿@inject ISnackbar SnackBar
 @inject ConfigService AppService
+@inject AuthenticationService AuthService
+@inject LoggingService Logger
+@inject IJSRuntime JsRuntime
 
 <MudContainer Class="mt-16" MaxWidth="MaxWidth.Large">
     <MudGrid Justify="Justify.Center">
@@ -14,16 +16,14 @@
                         </MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
-                        <MudLink Href="https://dev.twitch.tv/console/apps" Target="_blank">
-                            <MudIconButton Icon="@Icons.Material.Filled.Launch"/>
-                        </MudLink>
+                        <MudIconButton Icon="@Icons.Material.Filled.Launch" OnClick="StartAuthentication"/>
                     </CardHeaderActions>
                 </MudCardHeader>
                 <MudCardContent Class="pt-0">
-                    <MudTextField T="string" @bind-Value="@AppConfigDto!.ClientId"
-                                  HelperText="Client ID" InputType="InputType.Password" Margin="Margin.Dense"/>
-                    <MudTextField T="string" @bind-Value="@AppConfigDto!.ClientSecret"
-                                  HelperText="Client Secret" InputType="InputType.Password" Margin="Margin.Dense"/>
+                    <MudTextField T="string" @bind-Value="@AppConfigDto!.AccessToken"
+                                  HelperText="Access Token" InputType="InputType.Password" Margin="Margin.Dense"/>
+                    <MudTextField T="string" @bind-Value="@AppConfigDto!.ChannelId"
+                                  HelperText="Channel ID" Margin="Margin.Dense"/>
                 </MudCardContent>
             </MudCard>
 
@@ -65,6 +65,20 @@
         AppConfigDto = AppService.GetApplicationConfigDto();
     }
 
+    private async Task StartAuthentication()
+    {
+        string[] values = {AuthService.GetAuthenticationUrl(), "_blank"};
+        var token = new CancellationToken(false);
+        Logger.Log("Authentication process started");
+        await JsRuntime.InvokeAsync<object>("open", token, values);
+        var (accessToken, userId) = await AuthService.CompleteAuthentication();
+        AppConfigDto!.AccessToken = accessToken;
+        AppConfigDto.ChannelId = userId;
+        SaveAppConfig();
+        Logger.Log("Authentication process completed");
+        
+    }
+
     private void SaveAppConfig()
     {
         SnackBar.Clear();
@@ -74,5 +88,6 @@
         SnackBar.Configuration.SnackbarVariant = Variant.Filled;
         SnackBar.Add("Config saved successfully!", Severity.Success);
         AppService.SaveApplicationConfig();
+        Logger.Log("Saved application configuration");
     }
 }
